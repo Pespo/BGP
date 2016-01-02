@@ -15,8 +15,9 @@ public class GameManager : MonoBehaviour {
 	private BoardManager boardScript;						//Store a reference to our BoardManager which will set up the level.
 	private int level = 1;									//Current level number, expressed in game as "Day 1".
 	//private List<Enemy> enemies;							//List of all Enemy units, used to issue them move commands.
-	//private bool enemiesMoving;								//Boolean to check if enemies are moving.
+	//private bool enemiesMoving;							//Boolean to check if enemies are moving.
 	private bool doingSetup = true;							//Boolean to check if we're setting up board, prevent Player from moving during setup.
+	private GameObject player;
 
 	//Awake is always called before any Start functions
 	void Awake() {
@@ -28,6 +29,8 @@ public class GameManager : MonoBehaviour {
 		//enemies = new List<Enemy>();
 		boardScript = GetComponent<BoardManager>();
 		InitGame();
+
+		player = Instantiate ( Resources.Load ("Player") as GameObject );
 	}
 	
 	//This is called each time a scene is loaded.
@@ -54,7 +57,6 @@ public class GameManager : MonoBehaviour {
 		boardScript.SetupScene(level);		
 	}
 	
-	
 	//Hides black image used between levels
 	void HideLevelImage() {
 		levelImage.SetActive(false);
@@ -63,9 +65,22 @@ public class GameManager : MonoBehaviour {
 	
 	//Update is called every frame.
 	void Update() {
-		if(playersTurn || /*enemiesMoving ||*/ doingSetup) return;
+		if( doingSetup ) return;
 
+		if( Input.GetMouseButtonDown ( 0 ) )
+			click();
 		//StartCoroutine (MoveEnemies ());
+	}
+
+	protected void click() {
+		RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
+		 
+		if (hit.collider) {
+			Debug.Log ("Hit : " + hit.collider.gameObject.name );
+			player.transform.position = hit.collider.gameObject.transform.position;
+		} else {
+			Debug.Log ("Miss !");
+		}
 	}
 	
 	//Call this to add the passed in Enemy to the List of Enemy objects.
