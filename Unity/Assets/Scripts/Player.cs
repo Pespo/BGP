@@ -10,6 +10,8 @@ public class Player : MonoBehaviour {
 	private BoxCollider2D boxCollider; 		//The BoxCollider2D component attached to this object.
 	private Rigidbody2D rb2D;				//The Rigidbody2D component attached to this object.
 
+    public Vector2 coord;
+
 	protected void Start () {
 		animator = GetComponent<Animator>();
 
@@ -25,17 +27,20 @@ public class Player : MonoBehaviour {
 		int vertical = 0;		//Used to store the vertical move direction.
 	}
 	
-	protected void move() {
-		Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-		RaycastHit hit;
-
-		if(Physics.Raycast (ray, out hit)) {
-			if(hit.transform.name == "Player") {
-				Debug.Log ("This is a Player");
-			} else {
-				Debug.Log ("This isn't a Player");                
-			}
-		}
+	public void move( GameObject hexGO ) {
+        int maxMove = 3;
+        Hex hex = hexGO.GetComponent<Hex>();
+        if ( Mathf.Abs( hex.coord.x - coord.x) < maxMove && Mathf.Abs( hex.coord.y - coord.y ) < maxMove)  {
+            if (Mathf.Abs((hex.coord.x - coord.x) + (hex.coord.y - coord.y)) < maxMove) {
+                gameObject.transform.position = hex.transform.position;
+                coord = hex.coord;
+                Vector3 pos = Camera.main.gameObject.transform.position;
+                pos.x = hex.transform.position.x;
+                pos.y = hex.transform.position.y;
+                Camera.main.gameObject.transform.position = pos;
+            }
+        }
+        
 	}
 	
 	//OnTriggerEnter2D is sent when another object enters a trigger collider attached to this object (2D physics only).

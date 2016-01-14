@@ -17,8 +17,8 @@ public class GameManager : MonoBehaviour {
 	//private List<Enemy> enemies;							//List of all Enemy units, used to issue them move commands.
 	//private bool enemiesMoving;							//Boolean to check if enemies are moving.
 	private bool doingSetup = true;							//Boolean to check if we're setting up board, prevent Player from moving during setup.
-	private GameObject player;
-
+	private Player player;
+   
 	//Awake is always called before any Start functions
 	void Awake() {
 		if (instance == null) instance = this;
@@ -30,8 +30,12 @@ public class GameManager : MonoBehaviour {
 		boardScript = GetComponent<BoardManager>();
 		InitGame();
 
-		player = Instantiate ( Resources.Load ("Player") as GameObject );
-	}
+		GameObject playerGO = Instantiate ( Resources.Load ("Player") as GameObject );
+        player = playerGO.GetComponent<Player>();
+        if (player == null) Debug.Log("FUCK");
+
+        player.move(boardScript.startGO);
+    }
 	
 	//This is called each time a scene is loaded.
 	void OnLevelWasLoaded( int index ) {
@@ -75,10 +79,15 @@ public class GameManager : MonoBehaviour {
 	protected void click() {
 		RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
 		 
-		if (hit.collider) {
+		if ( hit.collider ) {
 			Debug.Log ("Hit : " + hit.collider.gameObject.name );
-			player.transform.position = hit.collider.gameObject.transform.position;
-		} else {
+            player.move( hit.collider.gameObject );
+            Debug.Log(" exit GO : " + boardScript.exitGO.transform.position);
+            Debug.Log(" hit GO : " + hit.collider.gameObject.transform.position);
+            if (boardScript.exitGO.transform.position == hit.collider.gameObject.transform.position ) {
+                Debug.Log("WIN !!");  
+            }
+        } else { 
 			Debug.Log ("Miss !");
 		}
 	}

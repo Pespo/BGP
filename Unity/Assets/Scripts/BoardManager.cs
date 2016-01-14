@@ -19,9 +19,10 @@ public class BoardManager : MonoBehaviour {
 	
 	
 	public int columns = 8; 										//Number of columns in our game board.
-	public int rows = 8;											//Number of rows in our game board.
-	//public Count wallCount = new Count (5, 9);						//Lower and upper limit for our random number of walls per level.
-	public GameObject exit;											//Prefab to spawn for exit.
+	public int rows = 8;                                            //Number of rows in our game board.
+    //public Count wallCount = new Count (5, 9);						//Lower and upper limit for our random number of walls per level.
+    public GameObject start;
+    public GameObject exit;											//Prefab to spawn for exit.
 	public GameObject[] floorTiles;									//Array of floor prefabs.
 	public GameObject[] wallTiles;									//Array of wall prefabs.
 	//public GameObject[] enemyTiles;									//Array of enemy prefabs.
@@ -29,10 +30,14 @@ public class BoardManager : MonoBehaviour {
 	
 	private Transform boardHolder;									//A variable to store a reference to the transform of our Board object.
 	private List <Vector3> gridPositions = new List <Vector3> ();	//A list of possible locations to place tiles.
-	
-	
-	//Clears our list gridPositions and prepares it to generate a new board.
-	void InitialiseList () {
+    public GameObject startGO;
+    public GameObject exitGO;
+
+
+
+
+    //Clears our list gridPositions and prepares it to generate a new board.
+    void InitialiseList () {
 		gridPositions.Clear ();
 
 		for(int x = 1; x < columns-1; x++) {
@@ -52,11 +57,20 @@ public class BoardManager : MonoBehaviour {
 				//Check if we current position is at board edge, if so choose a random outer wall prefab from our array of outer wall tiles.
 				/*if(x == -1 || x == columns || y == -1 || y == rows)
 					toInstantiate = outerWallTiles [Random.Range (0, outerWallTiles.Length)];*/
-				
-				GameObject instance = Instantiate (toInstantiate, new Vector3 (x + ( y * 0.5f), y, 0f), Quaternion.identity) as GameObject;
-				instance.name = x + " - " + y;
-				instance.transform.SetParent (boardHolder);
-			}
+				if( x == columns - 1 && y == rows - 1) {
+
+                    // End GameObject
+                    exitGO = Instantiate(exit, new Vector3(x + (y * 0.5f), y, 0f), Quaternion.identity) as GameObject;
+                    Hex hex = exitGO.GetComponent<Hex>();
+                    hex.coord = new Vector2(rows - 1, columns - 1);
+                } else {
+				    GameObject instance = Instantiate (toInstantiate, new Vector3 (x + ( y * 0.5f), y, 0f), Quaternion.identity) as GameObject;
+                    Hex hex = instance.GetComponent<Hex>();
+                    hex.coord = new Vector2(x, y);
+				    instance.name = x + " - " + y;
+                    instance.transform.SetParent(boardHolder);
+                }
+            }
 		}
 	}
 	
@@ -79,16 +93,21 @@ public class BoardManager : MonoBehaviour {
 	public void SetupScene (int level) {
 		BoardSetup ();
 		InitialiseList ();
-		//LayoutObjectAtRandom (wallTiles, wallCount.minimum, wallCount.maximum);
+        // Start GameObject
+        startGO = Instantiate (start, new Vector3 (0, 0, 0), Quaternion.identity) as GameObject;
+        Hex hex = startGO.GetComponent<Hex>();
+        hex.coord = new Vector2(0, 0);
 
-		/*
+        //LayoutObjectAtRandom (wallTiles, wallCount.minimum, wallCount.maximum);
+
+        /*
 		//Determine number of enemies based on current level number, based on a logarithmic progression
 		int enemyCount = (int)Mathf.Log(level, 2f);
 		
 		//Instantiate a random number of enemies based on minimum and maximum, at randomized positions.
 		LayoutObjectAtRandom (enemyTiles, enemyCount, enemyCount);*/
-		
-		//Instantiate the exit tile in the upper right hand corner of our game board
-		//Instantiate (exit, new Vector3 (columns - 1, rows - 1, 0f), Quaternion.identity);
-	}
+
+        //Instantiate the exit tile in the upper right hand corner of our game board
+        //Instantiate (exit, new Vector3 (columns - 1, rows - 1, 0f), Quaternion.identity);
+    }
 }
